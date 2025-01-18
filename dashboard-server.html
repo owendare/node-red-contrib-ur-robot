@@ -30,14 +30,14 @@ var values = [
         category: 'ur robot',
         color: '#C0DEED',
         defaults: {
-            name: {value:""},
-            host: {value:"localhost",required:true},
-            port: {value:29999,required:true,validate:RED.validators.number()},
-            command: {value:""},
-            argument: {value:""},
-            usemsgtopic: {value: false}
-            
-        },
+    name: {value:""},
+    host: {value:"localhost", required:true},
+    port: {value:29999, required:true, validate:RED.validators.number()},
+    command: {value:""},
+    argument: {value:""},
+    usemsgtopic: {value: false},
+    timeout: {value: 5}
+				},
         inputs:1,
         outputs:1,
         icon: "ur.png",
@@ -45,28 +45,46 @@ var values = [
             return this.name||"dashboard-server";
         },
         oneditprepare: function(){
-            for (var i = 0; i < values.length; i++) {
-                var value = values[i].value;
-                $('#node-input-command').append($("<option></option>").attr("value", value).text(value));
-            }                
-            // Make sure the selected value is also selected in the <select> tag
-            $('#node-input-command').val(this.command);
+    for (var i = 0; i < values.length; i++) {
+        var value = values[i].value;
+        $('#node-input-command').append($("<option></option>").attr("value", value).text(value));
+    }
+    
+    // Make sure the selected value is also selected in the <select> tag
+    $('#node-input-command').val(this.command);
 
-            $('#node-input-command').on('change', ()=>{
-                var val = $('#node-input-command').val();
-                for (let i = 0; i < values.length; i++) {
-                    const element = values[i];
-                    if(element.value === val){
-                        if(element.argument === false){
-                            $('#node-argument').hide();
-                        }else{
-                            $('#node-argument').show();
-                            $('#node-input-argument').attr("placeholder", element.placeholder);
-                        }
-                    }                    
+    // Handle command changes
+    $('#node-input-command').on('change', ()=>{
+        var val = $('#node-input-command').val();
+        for (let i = 0; i < values.length; i++) {
+            const element = values[i];
+            if(element.value === val){
+                if(element.argument === false){
+                    $('#node-argument').hide();
+                }else{
+                    $('#node-argument').show();
+                    $('#node-input-argument').attr("placeholder", element.placeholder);
                 }
-            });
+            }
         }
+    });
+
+    // Set initial timeout value if already configured
+    $('#node-input-timeout').val(this.timeout || 5); // Default to 5 if not set
+
+    // Timeout value control
+    $('#node-timeout-up').on('click', function() {
+        var currentValue = parseInt($('#node-input-timeout').val(), 10);
+        $('#node-input-timeout').val(currentValue + 1);
+    });
+
+    $('#node-timeout-down').on('click', function() {
+        var currentValue = parseInt($('#node-input-timeout').val(), 10);
+        if (currentValue > 1) {
+            $('#node-input-timeout').val(currentValue - 1);
+        }
+    });
+}
     });
 </script>
 
@@ -92,6 +110,14 @@ var values = [
             <label for="node-input-argument">argument</label>
             <input type="text" id="node-input-argument">
     </div>
+    <br>
+    <div class="form-row">
+    <label for="node-input-timeout">Timeout (seconds)</label>
+    <input type="number" id="node-input-timeout" min="1" max="3600" value="5" step="1" />
+    <button type="button" id="node-timeout-up">?</button>
+    <button type="button" id="node-timeout-down">?</button>
+</div>
+
     <br>
     <div class="form-row" >
             <label for="node-input-usemsgtopic">use msg.topic</label>
